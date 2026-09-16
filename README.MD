@@ -74,3 +74,10 @@ Node.js API
 This document will evolve throughout the project.
 
 For the full architecture notes, see [docs/architecture/system-overview.md](docs/architecture/system-overview.md).
+
+## Development journal
+
+Day-by-day build notes live in [`docs/guides/`](./docs/guides/).
+Start with [`docs/guides/README.md`](./docs/guides/README.md),
+or check [`docs/guides/progress.md`](./docs/guides/progress.md)
+for the current state.
