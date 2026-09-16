@@ -72,9 +72,3 @@ The platform is intended to evolve toward a more scalable service architecture w
 This document will evolve throughout the project.
 
 ---
-
-## Phase 7 — First commit (Task 11)
-
-```powershell
-git status
-```
