@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  avatars   Avatar[]
+
+  @@map("users")
+}
+
+model Avatar {
+  id          String          @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  versions    AvatarVersion[]
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consents    ConsentRecord[]
+  mediaAssets MediaAsset[]
+
+  @@index([userId])
+  @@map("avatars")
+}
+
+model AvatarVersion {
+  id          String        @id @default(cuid())
+  avatarId    String
+  version     Int
+  status      VersionStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  avatar      Avatar        @relation(fields: [avatarId], references: [id], onDelete: Cascade)
+  generations Generation[]
+
+  @@unique([avatarId, version])
+  @@index([avatarId])
+  @@map("avatar_versions")
+}
+
+model MediaAsset {
+  id               String            @id @default(cuid())
+  avatarId         String
+  kind             MediaKind
+  storageKey       String
+  mimeType         String
+  sizeBytes        Int
+  checksum         String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  generationInputs GenerationInput[]
+  avatar           Avatar            @relation(fields: [avatarId], references: [id], onDelete: Cascade)
+
+  @@index([avatarId])
+  @@map("media_assets")
+}
+
+model ConsentRecord {
+  id        String       @id @default(cuid())
+  avatarId  String
+  scope     ConsentScope
+  grantedAt DateTime     @default(now())
+  revokedAt DateTime?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  granted   Boolean
+  signature String
+  avatar    Avatar       @relation(fields: [avatarId], references: [id], onDelete: Cascade)
+
+  @@index([avatarId])
+  @@map("consent_records")
+}
+
+model Generation {
+  id              String            @id @default(cuid())
+  avatarVersionId String
+  kind            GenerationKind
+  status          GenerationStatus  @default(PENDING)
+  prompt          String?
+  parameters      Json              @default("{}")
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  error           String?
+  inputs          GenerationInput[]
+  avatarVersion   AvatarVersion     @relation(fields: [avatarVersionId], references: [id], onDelete: Cascade)
+
+  @@index([avatarVersionId])
+  @@index([status])
+  @@map("generations")
+}
+
+model GenerationInput {
+  id           String     @id @default(cuid())
+  generationId String
+  assetId      String
+  role         String?
+  asset        MediaAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  generation   Generation @relation(fields: [generationId], references: [id], onDelete: Cascade)
+
+  @@unique([generationId, assetId])
+  @@index([generationId])
+  @@index([assetId])
+  @@map("generation_inputs")
+}
+
+enum VersionStatus {
+  DRAFT
+  TRAINING
+  READY
+  FAILED
+  ARCHIVED
+}
+
+enum MediaKind {
+  IMAGE
+  VIDEO
+  AUDIO
+}
+
+enum ConsentScope {
+  TRAINING
+  GENERATION
+  COMMERCIAL
+  RESEARCH
+}
+
+enum GenerationKind {
+  IMAGE
+  VIDEO
+  AUDIO
+}
+
+enum GenerationStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}

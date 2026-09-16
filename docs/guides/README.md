@@ -18,8 +18,8 @@ actually happened, and how to verify it worked.
 |-----|--------------------------------|--------|
 | 1   | Foundation & environment       | ✅     |
 | 2   | Docker infrastructure          | ✅     |
-| 3   | Database architecture (Prisma) | 🔓     |
-| …   |                                |        |
+| 3   | Database architecture (Prisma) | ✅     |
+| 4   | _TBD_                          | 🔒     |
 
 Status key: ✅ verified · 🔓 in progress · 🔒 locked
 
